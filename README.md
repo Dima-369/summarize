@@ -1,3 +1,43 @@
+# My install instructions
+
+From the repository directory:
+
+```bash
+# Build the project
+pnpm -s build
+
+# Link globally (creates global symlink)
+pnpm link --global
+
+# Verify installation
+which summarize
+summarize --version
+
+# Use it
+echo "Test" | summarize - --model qwen/coder-model
+```
+
+To uninstall:
+```bash
+pnpm unlink --global
+```
+
+# Fork Changes
+
+Added Qwen model provider with OAuth2 authentication:
+- Reads credentials from `~/.qwen/oauth_creds.json` (no environment variables needed)
+- Automatic token refresh when expired
+- Uses `https://portal.qwen.ai/v1` API endpoint
+- Default model: `coder-model`
+
+Usage:
+```bash
+summarize "https://example.com" --model qwen/coder-model
+```
+
+
+# Original README
+
 # Summarize 📝 — Chrome Side Panel + CLI
 
 ![GitHub Repo Banner](https://ghrb.waren.build/banner?header=Summarize%F0%9F%93%9D&subheader=Chrome+Side+Panel+%2B+CLI&bg=f3f4f6&color=1f2937&support=true)
