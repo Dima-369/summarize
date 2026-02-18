@@ -23,7 +23,7 @@ export type MarkdownConverters = {
   markdownRequested: boolean;
   transcriptMarkdownRequested: boolean;
   effectiveMarkdownMode: "off" | "auto" | "llm" | "readability";
-  markdownProvider: "none" | "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia";
+  markdownProvider: "none" | "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia" | "qwen";
   markdownModel: MarkdownModel | null;
   convertHtmlToMarkdown:
     | ((args: {
@@ -203,6 +203,7 @@ export function createMarkdownConverters(
           openaiApiKey: markdownModel.openaiApiKeyOverride ?? ctx.model.apiStatus.apiKey,
           anthropicApiKey: ctx.model.apiStatus.anthropicApiKey,
           openrouterApiKey: ctx.model.apiStatus.openrouterApiKey,
+          qwenAccessToken: ctx.model.apiStatus.qwenAccessToken,
           openaiBaseUrlOverride:
             markdownModel.openaiBaseUrlOverride ?? ctx.model.apiStatus.providerBaseUrls.openai,
           anthropicBaseUrlOverride: ctx.model.apiStatus.providerBaseUrls.anthropic,
@@ -302,6 +303,7 @@ export function createMarkdownConverters(
           openaiApiKey: markdownModel.openaiApiKeyOverride ?? ctx.model.apiStatus.apiKey,
           anthropicApiKey: ctx.model.apiStatus.anthropicApiKey,
           openrouterApiKey: ctx.model.apiStatus.openrouterApiKey,
+          qwenAccessToken: ctx.model.apiStatus.qwenAccessToken,
           openaiBaseUrlOverride:
             markdownModel.openaiBaseUrlOverride ?? ctx.model.apiStatus.providerBaseUrls.openai,
           anthropicBaseUrlOverride: ctx.model.apiStatus.providerBaseUrls.anthropic,

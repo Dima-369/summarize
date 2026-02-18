@@ -61,6 +61,7 @@ export function createTranscriptToMarkdownConverter({
   xaiBaseUrlOverride,
   anthropicApiKey,
   openrouterApiKey,
+  qwenAccessToken,
   fetchImpl,
   forceChatCompletions,
   retries = 0,
@@ -79,6 +80,7 @@ export function createTranscriptToMarkdownConverter({
   fetchImpl: typeof fetch;
   anthropicApiKey: string | null;
   openrouterApiKey: string | null;
+  qwenAccessToken: string | null;
   forceChatCompletions?: boolean;
   retries?: number;
   onRetry?: (notice: {
@@ -89,7 +91,7 @@ export function createTranscriptToMarkdownConverter({
   }) => void;
   onUsage?: (usage: {
     model: string;
-    provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia";
+    provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia" | "qwen";
     usage: LlmTokenUsage | null;
   }) => void;
 }): ConvertTranscriptToMarkdown {
@@ -107,7 +109,14 @@ export function createTranscriptToMarkdownConverter({
 
     const result = await generateTextWithModelId({
       modelId,
-      apiKeys: { xaiApiKey, googleApiKey, openaiApiKey, anthropicApiKey, openrouterApiKey },
+      apiKeys: {
+        xaiApiKey,
+        googleApiKey,
+        openaiApiKey,
+        anthropicApiKey,
+        openrouterApiKey,
+        qwenAccessToken,
+      },
       forceOpenRouter,
       openaiBaseUrlOverride,
       anthropicBaseUrlOverride,
@@ -122,7 +131,7 @@ export function createTranscriptToMarkdownConverter({
     });
     onUsage?.({
       model: result.canonicalModelId,
-      provider: result.provider,
+      provider: result.provider as "openai" | "nvidia" | "anthropic" | "google" | "xai" | "zai",
       usage: result.usage ?? null,
     });
     return result.text;

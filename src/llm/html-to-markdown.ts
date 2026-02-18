@@ -49,6 +49,7 @@ export function createHtmlToMarkdownConverter({
   xaiBaseUrlOverride,
   anthropicApiKey,
   openrouterApiKey,
+  qwenAccessToken,
   fetchImpl,
   forceChatCompletions,
   retries = 0,
@@ -67,6 +68,7 @@ export function createHtmlToMarkdownConverter({
   fetchImpl: typeof fetch;
   anthropicApiKey: string | null;
   openrouterApiKey: string | null;
+  qwenAccessToken: string | null;
   forceChatCompletions?: boolean;
   retries?: number;
   onRetry?: (notice: {
@@ -77,7 +79,7 @@ export function createHtmlToMarkdownConverter({
   }) => void;
   onUsage?: (usage: {
     model: string;
-    provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia";
+    provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia" | "qwen";
     usage: LlmTokenUsage | null;
   }) => void;
 }): ConvertHtmlToMarkdown {
@@ -93,7 +95,14 @@ export function createHtmlToMarkdownConverter({
 
     const result = await generateTextWithModelId({
       modelId,
-      apiKeys: { xaiApiKey, googleApiKey, openaiApiKey, anthropicApiKey, openrouterApiKey },
+      apiKeys: {
+        xaiApiKey,
+        googleApiKey,
+        openaiApiKey,
+        anthropicApiKey,
+        openrouterApiKey,
+        qwenAccessToken,
+      },
       forceOpenRouter,
       openaiBaseUrlOverride,
       anthropicBaseUrlOverride,
@@ -106,7 +115,11 @@ export function createHtmlToMarkdownConverter({
       retries,
       onRetry,
     });
-    onUsage?.({ model: result.canonicalModelId, provider: result.provider, usage: result.usage });
+    onUsage?.({
+      model: result.canonicalModelId,
+      provider: result.provider as "openai" | "nvidia" | "anthropic" | "google" | "xai" | "zai",
+      usage: result.usage,
+    });
     return result.text;
   };
 }

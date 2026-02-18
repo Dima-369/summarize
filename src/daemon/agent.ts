@@ -396,6 +396,7 @@ type AgentApiKeys = {
   xaiApiKey: string | null;
   zaiApiKey: string | null;
   nvidiaApiKey: string | null;
+  qwenAccessToken: string | null;
 };
 
 const REQUIRED_ENV_BY_PROVIDER: Record<string, string> = {
@@ -431,6 +432,8 @@ function resolveApiKeyForModel({
         return apiKeys.xaiApiKey;
       case "zai":
         return apiKeys.zaiApiKey;
+      case "qwen":
+        return apiKeys.qwenAccessToken;
       default:
         return null;
     }
@@ -467,9 +470,10 @@ async function resolveAgentModel({
     zaiBaseUrl,
     nvidiaApiKey,
     nvidiaBaseUrl,
+    qwenAccessToken,
     envForAuto,
     cliAvailability,
-  } = resolveRunContextState({
+  } = await resolveRunContextState({
     env,
     envForRun: env,
     programOpts: { videoMode: "auto" },
@@ -487,6 +491,7 @@ async function resolveAgentModel({
     xaiApiKey,
     zaiApiKey,
     nvidiaApiKey,
+    qwenAccessToken,
   };
 
   const overrides = resolveRunOverrides({});

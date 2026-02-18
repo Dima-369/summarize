@@ -1,6 +1,7 @@
 import { isOpenRouterBaseUrl, resolveConfiguredBaseUrl } from "@steipete/summarize-core";
 import type { CliProvider, SummarizeConfig } from "../config.js";
 import { resolveCliAvailability, resolveExecutableInPath } from "./env.js";
+import { getQwenAccessToken } from "../llm/providers/qwen-oauth2.js";
 
 export type EnvState = {
   apiKey: string | null;
@@ -23,6 +24,8 @@ export type EnvState = {
   ytDlpPath: string | null;
   ytDlpCookiesFromBrowser: string | null;
   falApiKey: string | null;
+  qwenAccessToken: string | null;
+  qwenConfigured: boolean;
   cliAvailability: Partial<Record<CliProvider, boolean>>;
   envForAuto: Record<string, string | undefined>;
   providerBaseUrls: {
@@ -34,7 +37,7 @@ export type EnvState = {
   };
 };
 
-export function resolveEnvState({
+export async function resolveEnvState({
   env,
   envForRun,
   configForCli,
@@ -42,7 +45,7 @@ export function resolveEnvState({
   env: Record<string, string | undefined>;
   envForRun: Record<string, string | undefined>;
   configForCli: SummarizeConfig | null;
-}): EnvState {
+}): Promise<EnvState> {
   const xaiKeyRaw = typeof envForRun.XAI_API_KEY === "string" ? envForRun.XAI_API_KEY : null;
   const openaiBaseUrl = resolveConfiguredBaseUrl({
     envValue: envForRun.OPENAI_BASE_URL,
@@ -144,11 +147,23 @@ export function resolveEnvState({
     return null;
   })();
   const openaiTranscriptionKey = openaiKeyRaw?.trim() ?? null;
+  const qwenAccessToken = await (async (): Promise<string | null> => {
+    try {
+      return await getQwenAccessToken();
+    } catch {
+      return null;
+    }
+  })();
+  const qwenConfigured = typeof qwenAccessToken === "string" && qwenAccessToken.length > 0;
   const googleConfigured = typeof googleApiKey === "string" && googleApiKey.length > 0;
   const anthropicConfigured = typeof anthropicApiKey === "string" && anthropicApiKey.length > 0;
   const openrouterConfigured = typeof openrouterApiKey === "string" && openrouterApiKey.length > 0;
   const cliAvailability = resolveCliAvailability({ env, config: configForCli });
-  const envForAuto = openrouterApiKey ? { ...env, OPENROUTER_API_KEY: openrouterApiKey } : env;
+  const envForAuto = {
+    ...env,
+    ...(openrouterApiKey ? { OPENROUTER_API_KEY: openrouterApiKey } : {}),
+    ...(qwenConfigured ? { QWEN_ACCESS_TOKEN: "configured" } : {}),
+  };
   const providerBaseUrls = {
     openai: openaiBaseUrl,
     nvidia: nvidiaBaseUrl,
@@ -174,6 +189,8 @@ export function resolveEnvState({
     firecrawlConfigured,
     googleConfigured,
     anthropicConfigured,
+    qwenAccessToken,
+    qwenConfigured,
     apifyToken,
     ytDlpPath,
     ytDlpCookiesFromBrowser,

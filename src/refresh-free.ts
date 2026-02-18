@@ -382,6 +382,7 @@ export async function refreshFree({
     googleApiKey: null,
     anthropicApiKey: null,
     openrouterApiKey: openrouterKey,
+    qwenAccessToken: null,
   };
 
   type Ok = {

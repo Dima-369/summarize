@@ -103,6 +103,8 @@ export type UrlFlowModel = {
     zaiApiKey: string | null;
     zaiBaseUrl: string;
     nvidiaBaseUrl: string;
+    qwenAccessToken: string | null;
+    qwenConfigured: boolean;
     firecrawlConfigured: boolean;
     firecrawlApiKey: string | null;
     apifyToken: string | null;

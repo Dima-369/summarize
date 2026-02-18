@@ -283,6 +283,8 @@ export type AssetSummaryContext = {
     zaiApiKey: string | null;
     zaiBaseUrl: string;
     nvidiaBaseUrl: string;
+    qwenAccessToken: string | null;
+    qwenConfigured: boolean;
   };
 };
 

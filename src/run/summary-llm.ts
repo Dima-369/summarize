@@ -66,6 +66,7 @@ export async function summarizeWithModelId({
     googleApiKey: string | null;
     anthropicApiKey: string | null;
     openrouterApiKey: string | null;
+    qwenAccessToken: string | null;
   };
   forceOpenRouter?: boolean;
   openaiBaseUrlOverride?: string | null;
@@ -82,7 +83,7 @@ export async function summarizeWithModelId({
   }) => void;
 }): Promise<{
   text: string;
-  provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia";
+  provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia" | "qwen";
   canonicalModelId: string;
   usage: Awaited<ReturnType<typeof generateTextWithModelId>>["usage"];
 }> {

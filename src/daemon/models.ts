@@ -134,6 +134,7 @@ export async function buildModelPickerOptions({
     anthropic: boolean;
     openrouter: boolean;
     zai: boolean;
+    qwen: boolean;
     cliClaude: boolean;
     cliGemini: boolean;
     cliCodex: boolean;
@@ -142,7 +143,7 @@ export async function buildModelPickerOptions({
   openaiBaseUrl: string | null;
   localModelsSource: { kind: "openai-compatible"; baseUrlHost: string } | null;
 }> {
-  const envState = resolveEnvState({ env, envForRun, configForCli });
+  const envState = await resolveEnvState({ env, envForRun, configForCli });
 
   const providers = {
     xai: Boolean(envState.xaiApiKey),
@@ -152,6 +153,7 @@ export async function buildModelPickerOptions({
     anthropic: envState.anthropicConfigured,
     openrouter: envState.openrouterConfigured,
     zai: Boolean(envState.zaiApiKey),
+    qwen: envState.qwenConfigured,
     cliClaude: false,
     cliGemini: false,
     cliCodex: false,

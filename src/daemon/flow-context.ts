@@ -106,7 +106,7 @@ export type DaemonUrlFlowContextArgs = {
   stdoutSink: TextSink;
 };
 
-export function createDaemonUrlFlowContext(args: DaemonUrlFlowContextArgs): UrlFlowContext {
+export async function createDaemonUrlFlowContext(args: DaemonUrlFlowContextArgs): Promise<UrlFlowContext> {
   const {
     env,
     fetchImpl,
@@ -174,6 +174,8 @@ export function createDaemonUrlFlowContext(args: DaemonUrlFlowContextArgs): UrlF
     zaiBaseUrl,
     nvidiaApiKey,
     nvidiaBaseUrl,
+    qwenAccessToken,
+    qwenConfigured,
     providerBaseUrls,
     firecrawlApiKey,
     firecrawlConfigured,
@@ -185,7 +187,7 @@ export function createDaemonUrlFlowContext(args: DaemonUrlFlowContextArgs): UrlF
     ytDlpPath,
     ytDlpCookiesFromBrowser,
     falApiKey,
-  } = resolveRunContextState({
+  } = await resolveRunContextState({
     env: envForRun,
     envForRun,
     programOpts: { videoMode: videoModeOverride ?? "auto" },
@@ -259,6 +261,7 @@ export function createDaemonUrlFlowContext(args: DaemonUrlFlowContextArgs): UrlF
       googleApiKey,
       anthropicApiKey,
       openrouterApiKey,
+      qwenAccessToken,
     },
     keyFlags: {
       googleConfigured,
@@ -352,6 +355,8 @@ export function createDaemonUrlFlowContext(args: DaemonUrlFlowContextArgs): UrlF
       zaiApiKey,
       zaiBaseUrl,
       nvidiaBaseUrl,
+      qwenAccessToken,
+      qwenConfigured,
     },
   };
 
@@ -431,6 +436,8 @@ export function createDaemonUrlFlowContext(args: DaemonUrlFlowContextArgs): UrlF
         zaiApiKey,
         zaiBaseUrl,
         nvidiaBaseUrl,
+        qwenAccessToken,
+        qwenConfigured,
         firecrawlConfigured,
         firecrawlApiKey,
         apifyToken,

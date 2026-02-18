@@ -139,7 +139,7 @@ export async function handleSlidesCliRequest({
     config: config?.ui?.theme,
   });
   (envForRun as Record<string, string | undefined>).SUMMARIZE_THEME = themeName;
-  const envState = resolveEnvState({ env: envForRun, envForRun, configForCli: config });
+  const envState = await resolveEnvState({ env: envForRun, envForRun, configForCli: config });
 
   const source = resolveSlideSourceFromUrl(url);
   if (!source) {

@@ -171,7 +171,7 @@ export async function streamSummaryForVisiblePage({
 
   const writeStatus = typeof sink.writeStatus === "function" ? sink.writeStatus : null;
 
-  const ctx = createDaemonUrlFlowContext({
+  const ctx = await createDaemonUrlFlowContext({
     env,
     fetchImpl,
     cache,
@@ -345,7 +345,7 @@ export async function streamSummaryForUrl({
 
   const writeStatus = typeof sink.writeStatus === "function" ? sink.writeStatus : null;
 
-  const ctx = createDaemonUrlFlowContext({
+  const ctx = await createDaemonUrlFlowContext({
     env,
     fetchImpl,
     cache,
@@ -454,7 +454,7 @@ export async function extractContentForUrl({
   const extractedRef = { value: null as ExtractedLinkContent | null };
   const slidesRef = { value: null as SlideExtractionResult | null };
 
-  const ctx = createDaemonUrlFlowContext({
+  const ctx = await createDaemonUrlFlowContext({
     env,
     fetchImpl,
     cache,

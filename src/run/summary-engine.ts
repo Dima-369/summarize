@@ -39,7 +39,7 @@ export type SummaryEngineDeps = {
   resolveMaxOutputTokensForCall: (modelId: string) => Promise<number | null>;
   resolveMaxInputTokensForCall: (modelId: string) => Promise<number | null>;
   llmCalls: Array<{
-    provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia" | "cli";
+    provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia" | "qwen" | "cli";
     model: string;
     usage: Awaited<ReturnType<typeof summarizeWithModelId>>["usage"] | null;
     costUsd?: number | null;
@@ -53,6 +53,7 @@ export type SummaryEngineDeps = {
     googleApiKey: string | null;
     anthropicApiKey: string | null;
     openrouterApiKey: string | null;
+    qwenAccessToken: string | null;
   };
   keyFlags: {
     googleConfigured: boolean;
@@ -136,6 +137,9 @@ export function createSummaryEngine(deps: SummaryEngineDeps) {
     }
     if (requiredEnv === "XAI_API_KEY") {
       return Boolean(deps.apiKeys.xaiApiKey);
+    }
+    if (requiredEnv === "QWEN_ACCESS_TOKEN") {
+      return Boolean(deps.apiKeys.qwenAccessToken);
     }
     return Boolean(deps.apiKeys.anthropicApiKey);
   };
@@ -238,6 +242,7 @@ export function createSummaryEngine(deps: SummaryEngineDeps) {
       googleApiKey: deps.keyFlags.googleConfigured ? deps.apiKeys.googleApiKey : null,
       anthropicApiKey: deps.keyFlags.anthropicConfigured ? deps.apiKeys.anthropicApiKey : null,
       openrouterApiKey: deps.keyFlags.openrouterConfigured ? deps.apiKeys.openrouterApiKey : null,
+      qwenAccessToken: deps.apiKeys.qwenAccessToken,
     };
 
     const modelResolution = await resolveModelIdForLlmCall({

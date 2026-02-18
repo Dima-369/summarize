@@ -44,14 +44,15 @@ function buildContext({
   return { systemPrompt, messages: normalizeMessages(messages) };
 }
 
-function resolveApiKeys(env: Record<string, string | undefined>): LlmApiKeys {
-  const envState = resolveEnvState({ env, envForRun: env, configForCli: null });
+async function resolveApiKeys(env: Record<string, string | undefined>): Promise<LlmApiKeys> {
+  const envState = await resolveEnvState({ env, envForRun: env, configForCli: null });
   return {
     xaiApiKey: envState.xaiApiKey,
     openaiApiKey: envState.apiKey ?? envState.openaiTranscriptionKey,
     googleApiKey: envState.googleApiKey,
     anthropicApiKey: envState.anthropicApiKey,
     openrouterApiKey: envState.openrouterApiKey,
+    qwenAccessToken: envState.qwenAccessToken,
   };
 }
 
@@ -78,7 +79,7 @@ export async function streamChatResponse({
   pushToSession: (event: ChatEvent) => void;
   emitMeta: (patch: Partial<ChatSession["lastMeta"]>) => void;
 }) {
-  const apiKeys = resolveApiKeys(env);
+  const apiKeys = await resolveApiKeys(env);
   const context = buildContext({ pageUrl, pageTitle, pageContent, messages });
 
   const resolveModel = () => {
@@ -117,7 +118,7 @@ export async function streamChatResponse({
     return;
   }
 
-  const envState = resolveEnvState({ env, envForRun: env, configForCli: null });
+  const envState = await resolveEnvState({ env, envForRun: env, configForCli: null });
   const attempts = buildAutoModelAttempts({
     kind: "text",
     promptTokens: null,

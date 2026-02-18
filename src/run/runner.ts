@@ -407,6 +407,8 @@ export async function runCli(
     zaiBaseUrl,
     nvidiaApiKey,
     nvidiaBaseUrl,
+    qwenAccessToken,
+    qwenConfigured,
     providerBaseUrls,
     firecrawlApiKey,
     firecrawlConfigured,
@@ -418,7 +420,7 @@ export async function runCli(
     falApiKey,
     cliAvailability,
     envForAuto,
-  } = resolveRunContextState({
+  } = await resolveRunContextState({
     env,
     envForRun,
     programOpts: program.opts() as Record<string, unknown>,
@@ -635,6 +637,7 @@ export async function runCli(
         googleApiKey,
         anthropicApiKey,
         openrouterApiKey,
+        qwenAccessToken,
       },
       keyFlags: {
         googleConfigured,
@@ -725,6 +728,8 @@ export async function runCli(
         zaiBaseUrl,
         nvidiaApiKey,
         nvidiaBaseUrl,
+        qwenAccessToken,
+        qwenConfigured,
       },
     };
 
@@ -912,6 +917,8 @@ export async function runCli(
           zaiApiKey,
           zaiBaseUrl,
           nvidiaBaseUrl,
+          qwenAccessToken,
+          qwenConfigured,
           firecrawlConfigured,
           firecrawlApiKey,
           apifyToken,

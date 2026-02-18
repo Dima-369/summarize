@@ -188,3 +188,25 @@ export function resolveAnthropicModel({
     })
   );
 }
+
+export function resolveQwenModel({
+  modelId,
+  context,
+  qwenBaseUrlOverride,
+}: {
+  modelId: string;
+  context: Context;
+  qwenBaseUrlOverride?: string | null;
+}): Model<Api> {
+  const allowImages = wantsImages(context);
+  // Qwen uses an OpenAI-compatible API
+  const base = tryGetModel("openai", modelId);
+  const api = "openai-completions";
+  const baseUrl = qwenBaseUrlOverride ?? base?.baseUrl ?? "https://portal.qwen.ai/v1";
+  return {
+    ...(base ?? createSyntheticModel({ provider: "openai", modelId, api, baseUrl, allowImages })),
+    api,
+    baseUrl,
+    input: allowImages ? ["text", "image"] : ["text"],
+  };
+}

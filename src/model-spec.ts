@@ -13,7 +13,7 @@ export type FixedModelSpec =
       transport: "native";
       userModelId: string;
       llmModelId: string;
-      provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia";
+      provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia" | "qwen";
       openrouterProviders: string[] | null;
       forceOpenRouter: false;
       requiredEnv:
@@ -22,7 +22,8 @@ export type FixedModelSpec =
         | "GEMINI_API_KEY"
         | "ANTHROPIC_API_KEY"
         | "Z_AI_API_KEY"
-        | "NVIDIA_API_KEY";
+        | "NVIDIA_API_KEY"
+        | "QWEN_ACCESS_TOKEN";
       openaiBaseUrlOverride?: string | null;
       forceChatCompletions?: boolean;
     }
@@ -113,6 +114,23 @@ export function parseRequestedModelId(raw: string): RequestedModel {
       // Default; can be overridden at runtime via NVIDIA_BASE_URL / config.nvidia.baseUrl.
       openaiBaseUrlOverride: "https://integrate.api.nvidia.com/v1",
       forceChatCompletions: true,
+    };
+  }
+
+  if (lower.startsWith("qwen/")) {
+    const model = trimmed.slice("qwen/".length).trim();
+    if (model.length === 0) {
+      throw new Error("Invalid model id: qwen/… is missing the model id");
+    }
+    return {
+      kind: "fixed",
+      transport: "native",
+      userModelId: `qwen/${model}`,
+      llmModelId: `qwen/${model}`,
+      provider: "qwen",
+      openrouterProviders: null,
+      forceOpenRouter: false,
+      requiredEnv: "QWEN_ACCESS_TOKEN", // Reserved - credentials loaded from ~/.qwen/oauth_creds.json
     };
   }
 

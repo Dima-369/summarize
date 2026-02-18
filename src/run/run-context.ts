@@ -2,7 +2,7 @@ import type { CliProvider } from "../config.js";
 import { resolveConfigState } from "./run-config.js";
 import { resolveEnvState } from "./run-env.js";
 
-export function resolveRunContextState({
+export async function resolveRunContextState({
   env,
   envForRun,
   programOpts,
@@ -18,7 +18,16 @@ export function resolveRunContextState({
   videoModeExplicitlySet: boolean;
   cliFlagPresent: boolean;
   cliProviderArg: CliProvider | null;
-}) {
+}): Promise<{
+  env: Record<string, string | undefined>;
+  envForRun: Record<string, string | undefined>;
+  programOpts: Record<string, unknown>;
+  languageExplicitlySet: boolean;
+  videoModeExplicitlySet: boolean;
+  cliFlagPresent: boolean;
+  cliProviderArg: CliProvider | null;
+} & ReturnType<typeof resolveConfigState> &
+  Awaited<ReturnType<typeof resolveEnvState>>> {
   const configState = resolveConfigState({
     envForRun,
     programOpts,
@@ -27,10 +36,20 @@ export function resolveRunContextState({
     cliFlagPresent,
     cliProviderArg,
   });
-  const envState = resolveEnvState({
+  const envState = await resolveEnvState({
     env,
     envForRun,
     configForCli: configState.configForCli,
   });
-  return { ...configState, ...envState };
+  return {
+    env,
+    envForRun,
+    programOpts,
+    languageExplicitlySet,
+    videoModeExplicitlySet,
+    cliFlagPresent,
+    cliProviderArg,
+    ...configState,
+    ...envState,
+  };
 }

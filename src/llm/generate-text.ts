@@ -11,6 +11,7 @@ import {
   normalizeAnthropicModelAccessError,
 } from "./providers/anthropic.js";
 import { completeGoogleDocument, completeGoogleText } from "./providers/google.js";
+import { completeQwenText } from "./providers/qwen.js";
 import {
   resolveAnthropicModel,
   resolveGoogleModel,
@@ -18,6 +19,7 @@ import {
   resolveXaiModel,
   resolveNvidiaModel,
   resolveZaiModel,
+  resolveQwenModel,
 } from "./providers/models.js";
 import {
   completeOpenAiDocument,
@@ -33,6 +35,7 @@ export type LlmApiKeys = {
   googleApiKey: string | null;
   anthropicApiKey: string | null;
   openrouterApiKey: string | null;
+  qwenAccessToken: string | null;
 };
 
 export type OpenRouterOptions = {
@@ -186,7 +189,7 @@ export async function generateTextWithModelId({
 }): Promise<{
   text: string;
   canonicalModelId: string;
-  provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia";
+  provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia" | "qwen";
   usage: LlmTokenUsage | null;
 }> {
   const parsed = parseGatewayStyleModelId(modelId);
@@ -439,6 +442,25 @@ export async function generateTextWithModelId({
         };
       }
 
+      if (parsed.provider === "qwen") {
+        const accessToken = apiKeys.qwenAccessToken;
+        if (!accessToken) throw new Error("Missing Qwen OAuth credentials for qwen/... model");
+        const result = await completeQwenText({
+          modelId: parsed.model,
+          accessToken,
+          context,
+          temperature: effectiveTemperature,
+          maxOutputTokens,
+          signal: controller.signal,
+        });
+        return {
+          text: result.text,
+          canonicalModelId: parsed.canonical,
+          provider: parsed.provider,
+          usage: result.usage,
+        };
+      }
+
       /* v8 ignore next */
       throw new Error(`Unknown provider ${parsed.provider}`);
     } catch (error) {
@@ -497,7 +519,7 @@ export async function streamTextWithModelId({
 }): Promise<{
   textStream: AsyncIterable<string>;
   canonicalModelId: string;
-  provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia";
+  provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia" | "qwen";
   usage: Promise<LlmTokenUsage | null>;
   lastError: () => unknown;
 }> {
@@ -550,7 +572,7 @@ export async function streamTextWithContext({
 }): Promise<{
   textStream: AsyncIterable<string>;
   canonicalModelId: string;
-  provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia";
+  provider: "xai" | "openai" | "google" | "anthropic" | "zai" | "nvidia" | "qwen";
   usage: Promise<LlmTokenUsage | null>;
   lastError: () => unknown;
 }> {
@@ -775,6 +797,40 @@ export async function streamTextWithContext({
         ...(typeof effectiveTemperature === "number" ? { temperature: effectiveTemperature } : {}),
         ...(typeof maxOutputTokens === "number" ? { maxTokens: maxOutputTokens } : {}),
         apiKey: openaiConfig.apiKey,
+        signal: controller.signal,
+      });
+
+      const textStream: AsyncIterable<string> = {
+        async *[Symbol.asyncIterator]() {
+          for await (const event of stream) {
+            if (event.type === "text_delta") yield event.delta;
+            if (event.type === "error") {
+              lastError = event.error;
+              break;
+            }
+          }
+        },
+      };
+      return {
+        textStream: wrapTextStream(textStream),
+        canonicalModelId: parsed.canonical,
+        provider: parsed.provider,
+        usage: streamUsageWithTimeout({ result: stream.result(), timeoutMs }),
+        lastError: () => lastError,
+      };
+    }
+
+    if (parsed.provider === "qwen") {
+      const accessToken = apiKeys.qwenAccessToken;
+      if (!accessToken) throw new Error("Missing Qwen OAuth credentials for qwen/... model");
+      const model = resolveQwenModel({
+        modelId: parsed.model,
+        context,
+      });
+      const stream = streamSimple(model, context, {
+        ...(typeof effectiveTemperature === "number" ? { temperature: effectiveTemperature } : {}),
+        ...(typeof maxOutputTokens === "number" ? { maxTokens: maxOutputTokens } : {}),
+        apiKey: accessToken,
         signal: controller.signal,
       });
 
