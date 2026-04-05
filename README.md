@@ -4,7 +4,7 @@ From the repository directory:
 
 ```bash
 # Build the project
-pnpm -s build
+pnpm install && pnpm -s build
 
 # Link globally (creates global symlink)
 pnpm link --global
